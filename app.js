@@ -5,12 +5,12 @@ const SHEET_WEB_URL = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}
 
 // --- Mock Data (Fallback if fetch fails) ---
 const MOCK_LEADERBOARD = [
-    { rank: 1, name: "Brijesh", points: 6.00, wonPredictions: 1, totalPredictions: 30 },
-    { rank: 2, name: "Joshy", points: 6.00, wonPredictions: 1, totalPredictions: 30 },
-    { rank: 3, name: "Preetish", points: 6.00, wonPredictions: 1, totalPredictions: 30 },
-    { rank: 4, name: "Vinod Padukkad", points: 6.00, wonPredictions: 1, totalPredictions: 30 },
-    { rank: 5, name: "Vinod", points: 6.00, wonPredictions: 1, totalPredictions: 30 },
-    { rank: 6, name: "Sunand", points: -30.00, wonPredictions: 1, totalPredictions: 30 }
+    { rank: 1, name: "Brijesh", points: 6.00, wonPredictions: 1, totalPredictions: 1 },
+    { rank: 2, name: "Joshy", points: 6.00, wonPredictions: 1, totalPredictions: 1 },
+    { rank: 3, name: "Preetish", points: 6.00, wonPredictions: 1, totalPredictions: 1 },
+    { rank: 4, name: "Vinod Padukkad", points: 6.00, wonPredictions: 1, totalPredictions: 1 },
+    { rank: 5, name: "Vinod", points: 6.00, wonPredictions: 1, totalPredictions: 1 },
+    { rank: 6, name: "Sunand", points: -30.00, wonPredictions: 0, totalPredictions: 1 }
 ];
 
 let leaderboardData = [];
@@ -234,28 +234,21 @@ function parseCSV(text) {
 
         const points = parseFloat(rawPoints) || 0;
 
-        // Calculate won and total predictions
-        let totalPredictions = parseInt(cols[totalBetsIdx]) || 0;
+        // Calculate won predictions by checking payout columns (even indices starting at 4 up to firstSummaryIdx - 1)
         let wonPredictions = 0;
-
-        // Calculate won predictions by checking payout columns (odd indices starting at 3 up to firstSummaryIdx - 1)
-        for (let j = 3; j < firstSummaryIdx; j += 2) {
+        for (let j = 4; j < firstSummaryIdx; j += 2) {
             if (cols[j] && cols[j].trim() !== '') {
                 const payout = parseFloat(cols[j]);
-                if (payout > 0) {
+                if (!isNaN(payout) && payout > 0) {
                     wonPredictions++;
                 }
             }
         }
 
-        // If totalPredictions is not present or 0, fallback to counting prediction columns
-        if (totalPredictions === 0) {
-            for (let j = 2; j < firstSummaryIdx; j += 2) {
-                if (cols[j] && cols[j].trim() !== '') {
-                    totalPredictions++;
-                }
-            }
-        }
+        // Total Predictions is under the Group of 32 column
+        let group32Idx = headers.findIndex(h => h.includes('group') && h.includes('32'));
+        if (group32Idx === -1) group32Idx = 176;
+        let totalPredictions = parseInt(cols[group32Idx]) || 0;
 
         if (totalPredictions > 0 || points !== 0) {
             items.push({ 
