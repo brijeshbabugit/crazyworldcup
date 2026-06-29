@@ -5,15 +5,12 @@ const SHEET_WEB_URL = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}
 
 // --- Mock Data (Fallback if fetch fails) ---
 const MOCK_LEADERBOARD = [
-    { rank: 1, name: "Nikku", points: 230.00, wonPredictions: 7, totalPredictions: 15 },
-    { rank: 2, name: "Santhosh", points: -2.00, wonPredictions: 6, totalPredictions: 14 },
-    { rank: 3, name: "Brijesh", points: -13.67, wonPredictions: 7, totalPredictions: 19 },
-    { rank: 4, name: "Pramod", points: -21.67, wonPredictions: 5, totalPredictions: 16 },
-    { rank: 5, name: "Antony", points: -37.00, wonPredictions: 7, totalPredictions: 17 },
-    { rank: 6, name: "Rony", points: -50.00, wonPredictions: 8, totalPredictions: 19 },
-    { rank: 7, name: "Nidhu", points: -60.00, wonPredictions: 0, totalPredictions: 3 },
-    { rank: 8, name: "Dain", points: -138.67, wonPredictions: 7, totalPredictions: 17 },
-    { rank: 9, name: "Demi", points: -187.00, wonPredictions: 3, totalPredictions: 13 }
+    { rank: 1, name: "Brijesh", points: 6.00, wonPredictions: 1, totalPredictions: 30 },
+    { rank: 2, name: "Joshy", points: 6.00, wonPredictions: 1, totalPredictions: 30 },
+    { rank: 3, name: "Preetish", points: 6.00, wonPredictions: 1, totalPredictions: 30 },
+    { rank: 4, name: "Vinod Padukkad", points: 6.00, wonPredictions: 1, totalPredictions: 30 },
+    { rank: 5, name: "Vinod", points: 6.00, wonPredictions: 1, totalPredictions: 30 },
+    { rank: 6, name: "Sunand", points: -30.00, wonPredictions: 1, totalPredictions: 30 }
 ];
 
 let leaderboardData = [];
@@ -156,7 +153,27 @@ async function initLeaderboard() {
 
 // Simple CSV Parser with Dynamic Column Resolution
 function parseCSV(text) {
-    const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+    const lines = [];
+    let currentLine = '';
+    let inQuotes = false;
+    for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        if (char === '"' || char === "'") {
+            inQuotes = !inQuotes;
+            currentLine += char;
+        } else if ((char === '\n' || char === '\r') && !inQuotes) {
+            if (currentLine.trim().length > 0) {
+                lines.push(currentLine.trim());
+            }
+            currentLine = '';
+        } else {
+            currentLine += char;
+        }
+    }
+    if (currentLine.trim().length > 0) {
+        lines.push(currentLine.trim());
+    }
+
     if (lines.length <= 5) return [];
 
     const headers = splitCSVLine(lines[4]).map(h => h.trim().toLowerCase());
@@ -350,9 +367,9 @@ function initContactForm() {
 // --- Upcoming Matches Logic ---
 
 const MOCK_UPCOMING = [
-    { badge: "Match #20", team1: "Austria", team2: "Jordan" },
-    { badge: "Match #21", team1: "Ghana", team2: "Panama" },
-    { badge: "Match #22", team1: "England", team2: "Croatia" }
+    { badge: "Match #74", team1: "Brazil", team2: "Japan" },
+    { badge: "Match #75", team1: "Germany", team2: "Paraguay" },
+    { badge: "Match #76", team1: "Netherlands", team2: "Morocco" }
 ];
 
 const FLAG_MAP = {
